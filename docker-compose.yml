@@ -1,0 +1,11 @@
+services:
+  aneurism-iv:
+    build: .
+    ports:
+      - "7777:7777"
+      - "7778:7778"
+      - "7779:7779"
+    tty: true
+    stdin_open: true
+    container_name: aniv-ds
+    
