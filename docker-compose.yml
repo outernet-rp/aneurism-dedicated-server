@@ -8,4 +8,6 @@ services:
     tty: true
     stdin_open: true
     container_name: aniv-ds
+    volumes:
+      - ./ds:/home/steam/aniv-ds/
     

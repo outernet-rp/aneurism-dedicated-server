@@ -138,7 +138,7 @@ validate_server() {
     fi
 
     # Run the SteamCMD validation command
-    steamcmd +force_install_dir "$INSTALL_DIR" +login "$USERNAME" +app_update "$APP_ID" validate +quit
+    /usr/games/steamcmd +force_install_dir "$INSTALL_DIR" +login "$USERNAME" +app_update "$APP_ID" validate +quit
 
     if [ $? -eq 0 ]; then
         echo "[$(date "$DATE_FORMAT")] Server validated successfully."
