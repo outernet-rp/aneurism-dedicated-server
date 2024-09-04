@@ -10,5 +10,6 @@ services:
     container_name: aniv-ds
     user: "1001:1001"
     volumes:
-      - ./ds:/home/steam/aniv-ds/
+      - "./ds:/home/steam/aniv-ds/"
+      - "./config:/home/steam/.config/unity3d/Vellocet/ANEURISM IV"
     
