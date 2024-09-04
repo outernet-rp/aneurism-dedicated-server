@@ -1,5 +1,5 @@
 #!/bin/bash
 mkdir ds
 mkdir config
-chown -R 1001:1001 ds
-chown -R 1001:1001 config
+chown -R 1000:1000 ds
+chown -R 1000:1000 config
