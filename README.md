@@ -4,6 +4,8 @@
 2. `cd aniv-ds`
 3. `bash ./setup.sh`
 ## Afterwards:
-4. `docker compose up`
+4. `docker compose up -d`
 ## To add ops:
 Add operators to aniv-ds/config/ops.cfg
+## To check logs:
+`docker logs aniv-ds`
