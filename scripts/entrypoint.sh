@@ -1,7 +1,7 @@
 #!/bin/bash
-ls -la
+whoami
 pwd
-id
+ls -la
 ./aniv-ds.sh validate anonymous
 cd aniv-ds
 ./aniv_server.x86_64 -map nightmare -timestamps

@@ -42,9 +42,9 @@ start_server() {
 
     cd $INSTALL_DIR
     if [ -z "$PASSWORD" ]; then
-        nohup $SERVER_EXECUTABLE -map $MAP -timestamps > "$SERVER_LOG" 2>&1 &
+        $SERVER_EXECUTABLE -map $MAP -timestamps
     else
-        nohup $SERVER_EXECUTABLE -map $MAP -password $PASSWORD -timestamps > "$SERVER_LOG" 2>&1 &
+        $SERVER_EXECUTABLE -map $MAP -password $PASSWORD -timestamps
     fi
 
     sleep 2  # Give it some time to start
@@ -138,7 +138,7 @@ validate_server() {
     fi
 
     # Run the SteamCMD validation command
-    /usr/games/steamcmd +force_install_dir "$INSTALL_DIR" +login "$USERNAME" +app_update "$APP_ID" validate +quit
+    /bin/bash /home/steam/steamcmd/steamcmd.sh +force_install_dir "$INSTALL_DIR" +login "$USERNAME" +app_update "$APP_ID" validate +quit
 
     if [ $? -eq 0 ]; then
         echo "[$(date "$DATE_FORMAT")] Server validated successfully."
