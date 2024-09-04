@@ -5,3 +5,5 @@
 3. `bash ./setup.sh`
 ## Afterwards:
 4. `docker compose up`
+## To add ops:
+Add operators to aniv-ds/config/ops.cfg
