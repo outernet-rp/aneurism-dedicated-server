@@ -9,4 +9,5 @@ To stop: `docker compose down`
 ## To add ops:
 Add operators to aniv-ds/config/ops.cfg
 ## To check logs:
-`docker logs aniv-ds`
+`docker logs aniv-ds` will show the last run.  
+Log files are stored in aniv-ds/ds/logs/
