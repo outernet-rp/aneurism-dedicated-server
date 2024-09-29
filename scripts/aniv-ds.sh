@@ -118,7 +118,7 @@ validate_server() {
         echo "[$(date "$DATE_FORMAT")] Validating server with username: anonymous..."
 
     # Run the SteamCMD validation command
-    /usr/games/steamcmd +force_install_dir "$INSTALL_DIR" +login "anonymous" +app_update "$APP_ID" validate +quit
+    /home/steam/steamcmd/steamcmd.sh +force_install_dir "$INSTALL_DIR" +login "anonymous" +app_update "$APP_ID" validate +quit
 
     if [ $? -eq 0 ]; then
         echo "[$(date "$DATE_FORMAT")] Server validated successfully."
