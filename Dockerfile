@@ -18,7 +18,6 @@ RUN apt update
 RUN apt install -y --no-install-recommends --no-install-suggests sqlite3
 USER 1000
 WORKDIR /home/steam/
-# ADD ./ds/ .
 ADD --chown=steam ./scripts/entrypoint.sh .
 ADD --chown=steam ./scripts/aniv-ds.sh .
 

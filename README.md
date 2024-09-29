@@ -6,6 +6,7 @@
 ## Afterwards:
 To start: `docker compose up -d`  
 To stop: `docker compose down`
+To rebuild after stopping: `docker system prune -a`, `docker compose up -d`
 ## To add ops:
 Add operators to aniv-ds/config/ops.cfg
 ## To check logs:
