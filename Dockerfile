@@ -24,9 +24,8 @@ ADD --chown=steam ./scripts/aniv-ds.sh .
 
 # Expose ports
 
-EXPOSE 7777
-EXPOSE 7778
-EXPOSE 7779
+EXPOSE 7776-7779/tcp
+EXPOSE 7776-7779/udp
 
 # Start server
 

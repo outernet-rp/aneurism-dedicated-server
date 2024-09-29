@@ -2,9 +2,8 @@ services:
   aneurism-iv:
     build: .
     ports:
-      - "7777:7777"
-      - "7778:7778"
-      - "7779:7779"
+      - "7776-7779:7776-7779/tcp"
+      - "7776-7779:7776-7779/udp"
     tty: true
     stdin_open: true
     container_name: aniv-ds
@@ -12,4 +11,3 @@ services:
     volumes:
       - "./ds:/home/steam/aniv-ds/"
       - "./config:/home/steam/.config/unity3d/Vellocet/ANEURISM IV"
-    

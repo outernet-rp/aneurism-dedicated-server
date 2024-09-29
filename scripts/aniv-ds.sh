@@ -6,15 +6,14 @@ MAP="nightmare"
 PASSWORD=""
 
 # Constants
-INSTALL_DIR="$HOME/aniv-ds"
-SERVER_EXECUTABLE="$INSTALL_DIR/aniv_server.x86_64"
+INSTALL_DIR="$( dirname -- "$( readlink -f -- "$0"; )"; )"
+APP_ID="2832030"
+SERVER_EXECUTABLE="aniv_server.x86_64"
 LOGS_DIR="$INSTALL_DIR/logs"
 SERVER_LOG="$LOGS_DIR/server.log"
-DB_PATH="$HOME/.config/unity3d/Vellocet/ANEURISM IV/Database.db"
+DB_PATH="$HOME/.config/unity3d/Vellocet/ANEURISM IV/aniv.db"
 OPS_CFG="$HOME/.config/unity3d/Vellocet/ANEURISM IV/ops.cfg"
 DATE_FORMAT="+%Y-%m-%d %H:%M:%S"
-APP_ID="2832030"
-STEAMAPPS_DIR="$INSTALL_DIR/steamapps"
 
 # Function to start the server
 start_server() {
@@ -40,16 +39,15 @@ start_server() {
     # Add more debug information
     echo "[$(date "$DATE_FORMAT")] Starting \"$SERVER_EXECUTABLE\""
 
-    cd $INSTALL_DIR
     if [ -z "$PASSWORD" ]; then
-        $SERVER_EXECUTABLE -map $MAP -timestamps
+        nohup ./"$SERVER_EXECUTABLE" -map $MAP -timestamps > "$SERVER_LOG" 2>&1 &
     else
-        $SERVER_EXECUTABLE -map $MAP -password $PASSWORD -timestamps
+        nohup ./"$SERVER_EXECUTABLE" -map $MAP -password $PASSWORD -timestamps > "$SERVER_LOG" 2>&1 &
     fi
 
     sleep 2  # Give it some time to start
 
-    if pgrep -f "$SERVER_EXECUTABLE" > /dev/null; then
+    if pgrep -f "./$SERVER_EXECUTABLE" > /dev/null; then
         echo "[$(date "$DATE_FORMAT")] Server started successfully."
     else
         echo "[$(date "$DATE_FORMAT")] Failed to start the server. Check the log for details: $SERVER_LOG"
@@ -106,6 +104,7 @@ remove_op() {
 # Function to restart the server
 restart_server() {
     stop_server
+    sleep 2
     if [ $? -eq 0 ]; then
         start_server
     else
@@ -116,29 +115,10 @@ restart_server() {
 
 # Function to validate the server
 validate_server() {
-    if [ $# -ne 1 ] || [ -z "$1" ]; then
-        echo "Usage: $0 validate <username>"
-        return 1
-    fi
-
-    USERNAME="$1"
-
-    echo "[$(date "$DATE_FORMAT")] Validating server with username: $USERNAME..."
-
-    # Ensure the install directory exists
-    if [ ! -d "$INSTALL_DIR" ]; then
-        echo "[$(date "$DATE_FORMAT")] Creating install directory: $INSTALL_DIR..."
-        mkdir -p "$INSTALL_DIR"
-    fi
-
-    # Ensure the steamapps directory exists
-    if [ ! -d "$STEAMAPPS_DIR" ]; then
-        echo "[$(date "$DATE_FORMAT")] Creating steamapps directory: $STEAMAPPS_DIR..."
-        mkdir -p "$STEAMAPPS_DIR"
-    fi
+        echo "[$(date "$DATE_FORMAT")] Validating server with username: anonymous..."
 
     # Run the SteamCMD validation command
-    /bin/bash /home/steam/steamcmd/steamcmd.sh +force_install_dir "$INSTALL_DIR" +login "$USERNAME" +app_update "$APP_ID" validate +quit
+    steamcmd +force_install_dir "$INSTALL_DIR" +login "anonymous" +app_update "$APP_ID" validate +quit
 
     if [ $? -eq 0 ]; then
         echo "[$(date "$DATE_FORMAT")] Server validated successfully."
@@ -169,7 +149,7 @@ case "$1" in
         remove_op "$2"
         ;;
     validate)
-        validate_server "$2"
+        validate_server
         ;;
     *)
         echo "Usage: $0 {start|stop|restart|delete_db|add_op|remove_op|validate}"
