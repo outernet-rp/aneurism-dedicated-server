@@ -15,7 +15,7 @@ FROM cm2network/steamcmd:latest
 # Add server files and entrypoint script
 USER 0
 RUN apt update
-RUN apt install -y --no-install-recommends --no-install-suggests sqlite3
+RUN apt install -y --no-install-recommends --no-install-suggests sqlite3 libsqlite3-dev
 USER 1000
 WORKDIR /home/steam/
 ADD --chown=steam ./scripts/entrypoint.sh .
