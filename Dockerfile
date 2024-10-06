@@ -22,9 +22,26 @@ ADD --chown=steam ./scripts/entrypoint.sh .
 ADD --chown=steam ./scripts/aniv-ds.sh .
 
 # Expose ports
-
 EXPOSE 7776-7779/tcp
 EXPOSE 7776-7779/udp
+
+# Profiler... Could be optimized
+#EXPOSE 55000-55495/tcp
+#EXPOSE 55000-55495/udp
+#EXPOSE 54997/udp
+#EXPOSE 54997/tcp
+
+#EXPOSE 35000/udp
+#EXPOSE 35000/tcp
+
+#EXPOSE 34997/udp
+#EXPOSE 34997/tcp
+
+#EXPOSE 4600/udp
+#EXPOSE 4600/tcp
+
+#EXPOSE 54997/udp
+#EXPOSE 54997/tcp
 
 # Start server
 
