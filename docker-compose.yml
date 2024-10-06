@@ -16,6 +16,7 @@ services:
         #- "4600:4600/tcp"
 
     tty: true
+    restart: unless-stopped
     stdin_open: true
     container_name: aniv-ds
     user: "1000:1000"
