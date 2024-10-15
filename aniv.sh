@@ -1,11 +1,14 @@
 #!/bin/bash
 set -e
 
-# Variables
+# Configuration Variables
+HOSTNAME="US Central | Outernet"
+PORT=7776
 MAP="nightmare"
 PASSWORD=""
-
-# Constants
+MAXPLAYERS=42
+STEAM_USERNAME="anonymous"  # Change if needed
+APP_ID="2832030"  # Game/App ID for SteamCMD
 INSTALL_DIR="$HOME/aniv-ds"
 SERVER_EXECUTABLE="$INSTALL_DIR/aniv_server.x86_64"
 LOGS_DIR="$INSTALL_DIR/logs"
@@ -13,8 +16,32 @@ SERVER_LOG="$LOGS_DIR/server.log"
 DB_PATH="$HOME/.config/unity3d/Vellocet/ANEURISM IV/aniv.db"
 OPS_CFG="$HOME/.config/unity3d/Vellocet/ANEURISM IV/ops.cfg"
 DATE_FORMAT="+%Y-%m-%d %H:%M:%S"
-APP_ID="2832030"
-STEAMAPPS_DIR="$INSTALL_DIR/steamapps"
+STEAMCMD_DIR="$HOME/steamcmd"
+
+# Auto-restart configuration (in hours)
+RESTART_INTERVAL_HOURS=3  # Default to 3 hours, modify as needed
+
+# Ensure necessary directories exist
+mkdir -p "$LOGS_DIR"
+mkdir -p "$STEAMCMD_DIR"
+
+# Function to install or update the server
+install_server() {
+    echo "[$(date "$DATE_FORMAT")] Installing/updating Aneurism IV server..."
+
+    # Install SteamCMD if not present
+    if [ ! -f "$STEAMCMD_DIR/steamcmd.sh" ]; then
+        echo "[$(date "$DATE_FORMAT")] SteamCMD not found, downloading..."
+        mkdir -p "$STEAMCMD_DIR"
+        cd "$STEAMCMD_DIR"
+        curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
+    fi
+
+    # Install or update the server using SteamCMD
+    $STEAMCMD_DIR/steamcmd.sh +force_install_dir "$INSTALL_DIR" +login "$STEAM_USERNAME" +app_update "$APP_ID" validate +quit
+
+    echo "[$(date "$DATE_FORMAT")] Server installed/updated successfully."
+}
 
 # Function to start the server
 start_server() {
@@ -26,9 +53,6 @@ start_server() {
 
     echo "[$(date "$DATE_FORMAT")] Starting the server..."
 
-    # Ensure the logs directory exists
-    mkdir -p "$LOGS_DIR"
-
     # Move old logs if they exist
     if [ -f "$SERVER_LOG" ]; then
         echo "[$(date "$DATE_FORMAT")] Archiving old logs..."
@@ -37,14 +61,12 @@ start_server() {
 
     chmod +x "$SERVER_EXECUTABLE"
 
-    # Add more debug information
-    echo "[$(date "$DATE_FORMAT")] Starting \"$SERVER_EXECUTABLE\""
-
-    cd $INSTALL_DIR
+    # Start the server
+    cd "$INSTALL_DIR"
     if [ -z "$PASSWORD" ]; then
-        $SERVER_EXECUTABLE -map $MAP -timestamps
+        $SERVER_EXECUTABLE -map "$MAP" -maxplayers "$MAXPLAYERS" -timestamps > "$SERVER_LOG" 2>&1 &
     else
-        $SERVER_EXECUTABLE -map $MAP -password $PASSWORD -timestamps
+        $SERVER_EXECUTABLE -map "$MAP" -password "$PASSWORD" -maxplayers "$MAXPLAYERS" -timestamps > "$SERVER_LOG" 2>&1 &
     fi
 
     sleep 2  # Give it some time to start
@@ -72,6 +94,19 @@ stop_server() {
         echo "[$(date "$DATE_FORMAT")] Failed to stop the server."
         return 1
     fi
+}
+
+# Function to restart the server
+restart_server() {
+    stop_server
+    sleep 2
+    start_server
+}
+
+# Function to show logs
+show_logs() {
+    echo "[$(date "$DATE_FORMAT")] Showing server logs..."
+    tail -f "$SERVER_LOG"
 }
 
 # Function to delete the database
@@ -103,50 +138,22 @@ remove_op() {
     echo "[$(date "$DATE_FORMAT")] Op removed."
 }
 
-# Function to restart the server
-restart_server() {
-    stop_server
-    sleep 2
-    if [ $? -eq 0 ]; then
+# Function to auto-restart the server at a given interval
+auto_restart_server() {
+    echo "[$(date "$DATE_FORMAT")] Auto-restart is enabled. Server will restart every $RESTART_INTERVAL_HOURS hour(s)."
+
+    while true; do
+        echo "[$(date "$DATE_FORMAT")] Waiting for $RESTART_INTERVAL_HOURS hour(s) before restart..."
+        sleep $((RESTART_INTERVAL_HOURS * 3600))
+
+        echo "[$(date "$DATE_FORMAT")] Stopping the server for auto-restart..."
+        stop_server
+        echo "[$(date "$DATE_FORMAT")] Updating the server during auto-restart..."
+        install_server
+        echo "[$(date "$DATE_FORMAT")] Restarting the server after update..."
         start_server
-    else
-        echo "[$(date "$DATE_FORMAT")] Server restart failed."
-        return 1
-    fi
-}
-
-# Function to validate the server
-validate_server() {
-    if [ $# -ne 1 ] || [ -z "$1" ]; then
-        echo "Usage: $0 validate <username>"
-        return 1
-    fi
-
-    USERNAME="$1"
-
-    echo "[$(date "$DATE_FORMAT")] Validating server with username: $USERNAME..."
-
-    # Ensure the install directory exists
-    if [ ! -d "$INSTALL_DIR" ]; then
-        echo "[$(date "$DATE_FORMAT")] Creating install directory: $INSTALL_DIR..."
-        mkdir -p "$INSTALL_DIR"
-    fi
-
-    # Ensure the steamapps directory exists
-    if [ ! -d "$STEAMAPPS_DIR" ]; then
-        echo "[$(date "$DATE_FORMAT")] Creating steamapps directory: $STEAMAPPS_DIR..."
-        mkdir -p "$STEAMAPPS_DIR"
-    fi
-
-    # Run the SteamCMD validation command
-    /bin/bash /home/steam/steamcmd/steamcmd.sh +force_install_dir "$INSTALL_DIR" +login "$USERNAME" +app_update "$APP_ID" validate +quit
-
-    if [ $? -eq 0 ]; then
-        echo "[$(date "$DATE_FORMAT")] Server validated successfully."
-    else
-        echo "[$(date "$DATE_FORMAT")] Server validation failed."
-        return 1
-    fi
+        echo "[$(date "$DATE_FORMAT")] Server auto-restart complete."
+    done
 }
 
 # Main script logic
@@ -160,6 +167,12 @@ case "$1" in
     restart)
         restart_server
         ;;
+    logs)
+        show_logs
+        ;;
+    install)
+        install_server
+        ;;
     delete_db)
         delete_database
         ;;
@@ -169,11 +182,11 @@ case "$1" in
     remove_op)
         remove_op "$2"
         ;;
-    validate)
-        validate_server "$2"
+    auto_restart)
+        auto_restart_server
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart|delete_db|add_op|remove_op|validate}"
+        echo "Usage: $0 {start|stop|restart|logs|install|delete_db|add_op|remove_op|auto_restart}"
         exit 1
         ;;
 esac
